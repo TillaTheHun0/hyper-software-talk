@@ -68,31 +68,109 @@ Scale on your terms
 # Lingua Franca
 
 <div v-click>
-<b>Entity/Model</b>: data, represented by a shape, and a set of rules on how to enforce/modify that shape
+<b>Business Logic</b>: the real-world bonafide rules of the business, implemented in code as:
+
+- Models: data, represented by a shape, and a set of rules on how to enforce/modify that shape
+- Interplay Between Models
+- **NO Side-Effects**
+- **SEPARATE from any external service aka. Database**
 </div>
 
 <div v-click>
-<b>Business Logic</b>: the real-world bonafide rules of the business, implemented in code
-
-<li><b>NO side-effects</b></li>
-<li><b>SEPARATE from any external service aka. Database</b></li>
-</div>
-
-<div v-click>
-<b>Side-Effect</b>: anything non-deterministic or that depends on the environment external from the business logic. Simply put:
+<b>Side-Effect</b>: anything non-deterministic external from the business logic. Simply put:
 <li><b>I/O</b> -- databases, queues, caches, buckets, 3rd party SaaS, etc...</li>
 <li>Presentation</li>
 </div>
 
 <div v-click>
-<b>Domain</b>: an abstraction (ideally an encapsulation) of a specific business context and accompanying business rules aka. a "bounded context".
+<b>Domain</b>: an encapsulation of a specific business context and accompanying business rules aka. a "bounded context".
 
 <li><b>Not to be confused with a "web" domain</b></li>
+<li><b>Not necessarily a separately deployed "thing"</b></li>
 <li>Examples: "Billing" "Profile" "Notifications" (NOT 1-1 with Models)</li>
 </div>
 
 <div v-click>
 <b>We can have a Domain that does not <i>encapsulate</i> well aka. a "leaky" Domain</b>
+</div>
+
+--- 
+
+# Lingua Franca
+
+Scale
+
+<div v-click>
+
+### Tech Scalability:
+
+- Request Throughput
+- Response Time
+- Network Resilience
+- Cost
+
+</div>
+
+<div v-click>
+
+### Socio-Tech Scalability:
+
+- **Technical Debt**
+- Onboarding
+- Continuous Delivery
+- **Team Member Concurrency**
+
+</div>
+
+---
+
+# Lingua Franca
+
+Scale
+
+
+Most teams focus on scaling -> _Tech_
+
+<div v-click>
+
+But more companies fail b/c the _Socio-Tech_ can't scale.
+</div>
+
+<br/>
+<br/>
+
+<div v-click>
+The problem more-often inhibiting teams isn't Tech-Scalability -- it's Socio-Technical Scalability.
+
+The intersection of Tech and Socio-Tech...
+
+</div>
+
+<div v-click>
+
+**Architecture**
+
+</div>
+
+---
+
+# Clarifications
+
+Socio-tech is...
+
+<div v-click>
+❌ NOT invasive governance over tech by non-tech
+</div>
+
+<div v-click>
+❌ NOT daily standups
+</div>
+
+<br />
+<br />
+
+<div v-click>
+✅ Treating other engineers as customers of your product: your APIs
 </div>
 
 ---
@@ -112,8 +190,7 @@ backgroundSize: contain
 - Actuates a rack and pinion or hydraulic system
 - OR sends a signal to the ECU
 - ~18" in diameter
-- What about for a go-cart?
-- What about for a plane?
+- What about for a go-cart/plane/boat?
 - etc...
 
 <br />OR...
@@ -126,11 +203,72 @@ backgroundSize: contain
 
 </div>
 
-<br />
+<div v-click>
+<b>A steering wheel is an <i>abstraction</i> that <i>encapsulates</i> "directing a vehicle"</b>
+</div>
 
 <div v-click>
-<b>A steering wheel is an <i>encapsulation</i> of how to make the car change direction</b>
+As a driver, I soley need only care about my goal -- <b>GOOD API ✅</b>
 </div>
+
+---
+
+````md magic-move {lines: true}
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const car: Driveable = {...}
+
+car.steer(90)
+car.steer(-180)
+```
+
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const gocart: Driveable = {...}
+
+gocart.steer(90)
+gocart.steer(-180)
+```
+
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const bigRig: Driveable = {...}
+
+bigRig.steer(100)
+bigRig.steer(-90)
+```
+
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const boat: Driveable = {...}
+
+boat.steer(100)
+boar.steer(-40)
+```
+
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const plane: Driveable = {...}
+
+plane.steer(120)
+plane.steer(-40)
+```
+````
 
 ---
 layout: image-right
@@ -159,11 +297,27 @@ backgroundSize: contain
 <br />
 
 <div v-click>
-<b>A light-switch is an <i>encapsulation</i> of how to send power to an electrical component</b>
+<b>A light-switch is an <i>encapsulation</i> of turning power on/off</b>
+-- <b>GOOD API ✅</b>
 </div>
 
 ---
-layout: center
+layout: image-right
+image: /punk-switch.png
+backgroundSize: contain
+---
+# A leaky light switch
+
+- Set your voltage
+- Set your amperage
+- Set A/C vs. D/C
+- Dial in based on resistance
+
+<div v-click>
+<b>I have to know all the details</b>
+-- <b>BAD API ❌</b>
+</div>
+
 ---
 
 ## An API is leaky when:
@@ -174,7 +328,7 @@ layout: center
 - It exposes more than what the consumer needs to know
 </div>
 <div v-click>
-- Change in implementation requires the consumer to change, <b>even if their goal hasn't changed</b>
+- Change in how it works requires the consumer to change, <b>even if their goal hasn't changed</b>
 </div>
 
 ---
@@ -190,19 +344,35 @@ layout: center
 ...OR
 
 <div v-click>
-<b>It allows for modifying one piece of the software without breaking another, unrelated, piece of software</b>
+<b>It enables modifying one piece of the software while not needing to modify another piece of software</b>
 
 A key quality indicator of a piece of software is its ability to be
-modified without breaking something unrelated.
+modified without breaking a consumer.
 
 The most important thing to encapsulate...
 </div>
 
 <div v-click>
-<b>Business Logic</b>
+<b>Business Logic!</b>
+</div>
 
-We ought to use patterns and tools that help us encapsulate our business logic
-and make it easy to understand and **change over time**
+---
+layout: center
+---
+# So which Architectural Patterns are best?
+
+<div v-click>
+
+The ones that _encourage_ encapsulating _away_ components not in our direct control. Allow
+them to _change_ without the consumer changing.
+
+We ought to use patterns and tools that help us encapsulate our business logic,
+make it easy to understand, and to **change over time**
+</div>
+
+<div v-click>
+
+Separate **side-effects** details from **business logic** details.
 </div>
 
 ---
@@ -457,7 +627,7 @@ describe('calcTotalUnderageMileage', () => {
 ````
 
 ---
-zoom: 0.65
+zoom: 0.60
 ---
 
 # How can I be sure that my stubs are always correct?
@@ -512,7 +682,7 @@ function calculateTotalMileageWith ({ findTripsWithDriversByCarId }) {
 Shifting imperative constructs _down_ and declarative constructs _up_
 
 - The lower the level, the more _imperative_. The higher the level, the more _declarative_
-- Business logic entrypoints should be declarative, like SQL
+- Business logic entrypoints should be _declarative_ (think "issuing a command")
 
 <img src='/stratified.jpg' />
 
@@ -689,14 +859,65 @@ Not inheritance -- inheritance sucks.
 </div>
 
 <div v-click>
-<b>Open-Closed is encouraged by Stratified Design!</b>
+<b>Open-Closed is encouraged by Inversion of Control & Stratified Design!</b>
 
 Strata within Strata within Strata -- Strata Composition!
 </div>
 
-<br />
-<br />
-<br />
+---
+
+# You've already seen it!
+
+````md magic-move {lines: true}
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const car: Driveable = {...}
+
+car.steer(90)
+```
+
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const boat: Driveable = {...}
+
+boat.steer(100)
+```
+
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const plane: Driveable = {...}
+
+plane.steer(120) // consumer doesn't need to know the details
+```
+
+```ts
+interface Driveable {
+  steer(degrees: number): Promise<number>
+}
+
+const nascar: Driveable = {
+  direction: 0,
+  steer: async (degrees) => {
+    nascar.direction = Math.min(nascar.direction + degrees, 0) // can only turn left!
+    return nascar.direction
+  }
+}
+
+nascar.steer(30)
+```
+````
+---
+layout: center
+---
 
 <div v-click>
 <b>All of this culminates in...</b>
@@ -732,6 +953,7 @@ layout: center
 ```
 Driving Adapter <--> Port <--> Business Layer <--> Port <--> Driven Adapter
 ```
+<img src='/arc.png' />
 
 ---
 
@@ -804,18 +1026,6 @@ OR...
 <div v-click>
 <b>Adapters are interchangeable</b>
 </div>
-
----
-layout: image-right
-image: /hover-lightning.svg
----
-
-# `hyper` Service Framework
-
-- Ports and Adapters, as a Services Tier
-- use `hyper-nano` when developing locally
-- Deploy a `hyper` `Server` in an environment
-  - Pick the adapters for your underlying services
 
 ---
 
